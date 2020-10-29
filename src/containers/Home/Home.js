@@ -12,7 +12,7 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import { addCity, removeCity, getCurrentLocationWeather, getCities, addCurrentLocationWeather } from "./weatherReducer";
 import { getWeatherByCity, getWeatherByCoordinate } from "./weatherHelper";
 import Button from "@material-ui/core/Button";
-
+import useDebounce from "../../hooks/useDebounce";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -30,6 +30,10 @@ const useStyles = makeStyles(theme => ({
         display: 'flex',
         marginRight: 20,
     },
+    addCityWrapper: {
+        display: 'flex',
+        marginBottom: 50,
+    },
 }));
 
 export default function Home() {
@@ -37,12 +41,19 @@ export default function Home() {
   const currentLocationWeather = useSelector(getCurrentLocationWeather);
   const dispatch = useDispatch();
   const classes = useStyles();
-  const [currentPosition, setCurrentPosition] = useState({
-      long: null,
-      lat: null,
-  });
+  const [currentPosition, setCurrentPosition] = useState({ long: null, lat: null });
+  const [editable, setEditable] = useState(() => cities.map(o => ({ ...o })));
   const [cityOptions, setCityOptions] = useState([]);
+  const [cityExisted, setCityExisted] = useState(false);
+  const [selectedCity, setSelectedCity] = useState(false);
+  const [searchingCity, setSearchingCity] = useState(null);
+  const debouncedSearchTerm = useDebounce(searchingCity, 500);
 
+
+  useEffect(() => {
+      setEditable(cities.map(o => ({ ...o })));
+      setCityExisted(cities.some(item => item.name === selectedCity));
+  },[cities, selectedCity]);
 
   useEffect( () => {
     geolocation.getCurrentPosition((err, position) => {
@@ -56,7 +67,7 @@ export default function Home() {
     })
   },[]);
 
-    useEffect( () => {
+  useEffect( () => {
         if (currentPosition.lat && currentPosition.long && !Object.keys(currentLocationWeather).length) {
             getWeatherByCoordinate(currentPosition.lat,currentPosition.long).then(r => {
                 dispatch(addCurrentLocationWeather({
@@ -68,7 +79,22 @@ export default function Home() {
                 }));
             })
         }
-    },[currentPosition]);
+    },[currentPosition, currentLocationWeather, dispatch]);
+
+  useEffect(() => {
+      if (debouncedSearchTerm) {
+          getWeatherByCity(debouncedSearchTerm)
+              .then(r => {
+                  setCityOptions([{
+                      name: r.data.name,
+                      description: r.data.weather[0].main,
+                      detailedDescription: r.data.weather[0].description,
+                      temperature: r.data.main.temp + ' C',
+                      country: r.data.sys.country,
+                  }]);
+              }).catch((e) => {});
+      }
+  }, [debouncedSearchTerm]);
 
   return (
     <Box className={classes.root}>
@@ -93,36 +119,48 @@ export default function Home() {
 
         <Box>
             <h2>Add City</h2>
-            <Box>
+            <Box className={classes.addCityWrapper}>
                 <Autocomplete
-                    onInputChange={async (event, newInputValue) => {
-                        getWeatherByCity(newInputValue)
-                            .then(r => {
-                                setCityOptions([{
-                                    name: r.data.name,
-                                    description: r.data.weather[0].main,
-                                    detailedDescription: r.data.weather[0].description,
-                                    temperature: r.data.main.temp,
-                                    country: r.data.sys.country,
-                                }]);
-                            }).catch((e) => {});
+                    disableClearable
+                    onInputChange={async (event, newInputValue) => setSearchingCity(newInputValue)}
+                    onChange={(e, value) => {
+                        if (!value) {
+                            setCityOptions([])
+                        } else {
+                            setSelectedCity(value.name);
+                        }
                     }}
+                    getOptionSelected={(option, value) => option.name === value.name}
                     options={cityOptions}
                     getOptionLabel={(option) => option.name}
-                    style={{ width: 300 }}
-                    renderInput={(params) => <TextField {...params} label="Combo box" variant="outlined" />}
+                    style={{ width: 300, marginRight: 20, }}
+                    renderInput={(params) => <TextField {...params} label="Select city" variant="outlined" />}
                 />
-                <Button >Add city</Button>
+                <Button variant="contained" color="primary" disabled={!cityOptions.length || cityExisted} onClick={() => {
+                    dispatch(addCity(cityOptions[0]))
+                }}>Add city</Button>
             </Box>
 
         </Box>
         <MaterialTable
             columns={[
-                { title: 'City name', field: 'name' },
+                { title: 'City', field: 'name' },
+                { title: 'Country', field: 'country' },
                 { title: 'Temperature', field: 'temperature' },
                 { title: 'Description', field: 'description' },
+                { title: 'Detailed description', field: 'detailedDescription' },
             ]}
-            data={[{ name: 'Mehmet', surname: 'Baran', birthYear: 1987, birthCity: 63 }]}
+            options={{
+                actionsColumnIndex: -1
+            }}
+            actions={[
+                {
+                    icon: 'delete',
+                    tooltip: 'Delete User',
+                    onClick: (event, rowData) => dispatch(removeCity(rowData.tableData.id))
+                }
+            ]}
+            data={editable}
             title="Weather Table"
         />
     </Box>

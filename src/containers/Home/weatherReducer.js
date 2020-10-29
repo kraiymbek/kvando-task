@@ -8,10 +8,11 @@ export const weather = createSlice({
   },
   reducers: {
     addCity: (state, res) => {
-      state.cities.push(res);
+      state.cities.push(res.payload);
     },
-    removeCity: state => {
-      // state.cities.slice();
+    removeCity: (state, res) => {
+      state.cities = state.cities.filter((item, index) => res.payload !== index);
+
     },
     addCurrentLocationWeather: (state, res) => {
       state.currentLocationWeather = res.payload;
