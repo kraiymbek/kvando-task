@@ -4,14 +4,18 @@ export const weather = createSlice({
   name: 'weather',
   initialState: {
     currentLocationWeather: {},
-    cities: [],
+    cities: localStorage.getItem('cities') ? JSON.parse(localStorage.getItem('cities')) : [],
   },
   reducers: {
     addCity: (state, res) => {
-      state.cities.push(res.payload);
+      const editedCities = [...state.cities, res.payload];
+      state.cities = editedCities;
+      localStorage.setItem('cities', JSON.stringify(editedCities));
     },
     removeCity: (state, res) => {
-      state.cities = state.cities.filter((item, index) => res.payload !== index);
+      const editedCity = state.cities.filter((item, index) => res.payload !== index);
+      state.cities = editedCity;
+      localStorage.setItem('cities', JSON.stringify(editedCity));
 
     },
     addCurrentLocationWeather: (state, res) => {
