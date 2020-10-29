@@ -8,9 +8,11 @@ export const weather = createSlice({
   },
   reducers: {
     addCity: (state, res) => {
-      const editedCities = [...state.cities, res.payload];
-      state.cities = editedCities;
-      localStorage.setItem('cities', JSON.stringify(editedCities));
+      if (state.cities.some(item => item.name !== res.payload.name)) {
+        const editedCities = [...state.cities, res.payload];
+        state.cities = editedCities;
+        localStorage.setItem('cities', JSON.stringify(editedCities));
+      }
     },
     removeCity: (state, res) => {
       const editedCity = state.cities.filter((item, index) => res.payload !== index);
