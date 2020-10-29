@@ -82,7 +82,7 @@ export default function Home() {
     },[currentPosition, currentLocationWeather, dispatch]);
 
   useEffect(() => {
-      if (debouncedSearchTerm && !cities.some(item => item.name === debouncedSearchTerm)) {
+      if (debouncedSearchTerm) {
           getWeatherByCity(debouncedSearchTerm)
               .then(r => {
                   setCityOptions([{
