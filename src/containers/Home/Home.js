@@ -82,7 +82,7 @@ export default function Home() {
     },[currentPosition, currentLocationWeather, dispatch]);
 
   useEffect(() => {
-      if (debouncedSearchTerm) {
+      if (debouncedSearchTerm && !cities.some(item => item.name === debouncedSearchTerm)) {
           getWeatherByCity(debouncedSearchTerm)
               .then(r => {
                   setCityOptions([{
@@ -122,7 +122,12 @@ export default function Home() {
             <Box className={classes.addCityWrapper}>
                 <Autocomplete
                     disableClearable
-                    onInputChange={async (event, newInputValue) => setSearchingCity(newInputValue)}
+                    onInputChange={async (event, newInputValue) => {
+                        if (!newInputValue) {
+                            setCityOptions([]);
+                        }
+                        setSearchingCity(newInputValue);
+                    }}
                     onChange={(e, value) => {
                         if (!value) {
                             setCityOptions([])
