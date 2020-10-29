@@ -8,7 +8,7 @@ export const weather = createSlice({
   },
   reducers: {
     addCity: (state, res) => {
-      if (state.cities.some(item => item.name !== res.payload.name)) {
+      if (!state.cities.some(item => item.name === res.payload.name)) {
         const editedCities = [...state.cities, res.payload];
         state.cities = editedCities;
         localStorage.setItem('cities', JSON.stringify(editedCities));
