@@ -5,8 +5,11 @@
   "dependencies": {
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
+    "@material-ui/lab": "^4.0.0-alpha.56",
     "@reduxjs/toolkit": "^1.4.0",
+    "axios": "^0.21.0",
     "classnames": "^2.2.6",
+    "geolocation": "^0.2.0",
     "material-table": "^1.69.1",
     "react": "16.13.1",
     "react-dom": "16.13.1",
