@@ -1,52 +1,66 @@
 import React from "react";
-import Button from "@material-ui/core/Button";
-import Card from "@material-ui/core/Card";
-import CardContent from "@material-ui/core/CardContent";
-import CardActions from "@material-ui/core/CardActions";
-import Typography from "@material-ui/core/Typography";
-
-import { increment, decrement, getCounter } from "./counterReducer";
 import { useSelector, useDispatch } from "react-redux";
+import MaterialTable from 'material-table'
+
+import { makeStyles } from '@material-ui/core/styles';
+import Box from "@material-ui/core/Box";
+
+import { add, remove, getWeather } from "./weatherReducer";
+
+
+const useStyles = makeStyles(theme => ({
+    root: {
+        width: '100%',
+        display: 'flex',
+        '& .MuiPaper-root': {
+            width: '100%',
+        },
+    },
+}));
 
 export default function Home() {
-
-  const counter = useSelector(getCounter);
-
+  const weather = useSelector(getWeather);
   const dispatch = useDispatch();
+  const classes = useStyles();
 
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center"
-      }}
-    >
-      <Card>
-        <CardContent>
-          <Typography variant="h5">
-            Redux Example
-          </Typography>
-          <Typography
-            align="center"
-            variant="subtitle1"
-          >
-            Counter: {counter}
-          </Typography>
-        </CardContent>
-        <CardActions>
-          <Button color="primary" variant="contained" onClick={() => dispatch(increment())}>
-            Increment
-          </Button>
-          <Button
-            color="secondary"
-            variant="contained"
-            onClick={() => dispatch(decrement())}
-          >
-            Decrement
-          </Button>
-        </CardActions>
-      </Card>
-    </div>
+    <Box className={classes.root}>
+        <MaterialTable
+            columns={[
+                { title: 'Adı', field: 'name' },
+                { title: 'Soyadı', field: 'surname' },
+                { title: 'Doğum Yılı', field: 'birthYear', type: 'numeric' },
+                { title: 'Doğum Yeri', field: 'birthCity', lookup: { 34: 'İstanbul', 63: 'Şanlıurfa' } }
+            ]}
+            data={[{ name: 'Mehmet', surname: 'Baran', birthYear: 1987, birthCity: 63 }]}
+            title="Demo Title"
+        />
+    </Box>
   );
 };
+
+// <Card>
+//   <CardContent>
+//     <Typography variant="h5">
+//       Weather Spa
+//     </Typography>
+//     <Typography
+//         align="center"
+//         variant="subtitle1"
+//     >
+//       Counter: {counter}
+//     </Typography>
+//   </CardContent>
+//   <CardActions>
+//     <Button color="primary" variant="contained" onClick={() => dispatch(increment())}>
+//       Increment
+//     </Button>
+//     <Button
+//         color="secondary"
+//         variant="contained"
+//         onClick={() => dispatch(decrement())}
+//     >
+//       Decrement
+//     </Button>
+//   </CardActions>
+// </Card>
